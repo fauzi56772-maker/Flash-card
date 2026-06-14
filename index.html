@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FlashMind – Flashcard Generator dari Text & PDF</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+</head>
+<body>
+
+  <!-- ===== NAVBAR ===== -->
+  <nav class="navbar" id="navbar">
+    <div class="nav-container">
+      <div class="nav-brand">
+        <div class="nav-logo">
+          <i class="fas fa-bolt"></i>
+        </div>
+        <span class="brand-name">Flash<span class="brand-accent">Mind</span></span>
+      </div>
+      <div class="nav-links">
+        <a href="#input-section" class="nav-link">Generate</a>
+        <a href="#flashcard-section" class="nav-link">Flashcards</a>
+        <a href="#quiz-section" class="nav-link">Quiz</a>
+        <a href="#saved-section" class="nav-link">Saved</a>
+        <a href="#stats-section" class="nav-link">Stats</a>
+      </div>
+      <div class="nav-actions">
+        <button class="btn-icon" id="darkModeToggle" title="Toggle Dark Mode">
+          <i class="fas fa-moon" id="darkModeIcon"></i>
+        </button>
+        <button class="btn-primary btn-sm" id="navGenerateBtn">
+          <i class="fas fa-magic"></i> Generate
+        </button>
+        <button class="btn-icon nav-menu-btn" id="navMenuBtn">
+          <i class="fas fa-bars"></i>
+        </button>
+      </div>
+    </div>
+    <!-- Mobile Menu -->
+    <div class="mobile-menu" id="mobileMenu">
+      <a href="#input-section" class="mobile-link">Generate</a>
+      <a href="#flashcard-section" class="mobile-link">Flashcards</a>
+      <a href="#quiz-section" class="mobile-link">Quiz</a>
+      <a href="#saved-section" class="mobile-link">Saved</a>
+      <a href="#stats-section" class="mobile-link">Stats</a>
+    </div>
+  </nav>
+
+  <!-- ===== HERO SECTION ===== -->
+  <section class="hero" id="hero">
+    <div class="hero-bg">
+      <div class="hero-blob hero-blob-1"></div>
+      <div class="hero-blob hero-blob-2"></div>
+      <div class="hero-blob hero-blob-3"></div>
+      <div class="hero-grid"></div>
+    </div>
+    <div class="hero-container">
+      <div class="hero-badge">
+        <i class="fas fa-sparkles"></i>
+        <span>AI-Powered Flashcard Generator</span>
+      </div>
+      <h1 class="hero-title">
+        Ubah Materi Panjang Jadi<br />
+        <span class="gradient-text">Flashcard Cerdas</span><br />
+        dalam Hitungan Detik
+      </h1>
+      <p class="hero-subtitle">
+        FlashMind membaca teks atau PDF kamu, mengekstrak poin-poin penting,<br />
+        lalu mengubahnya menjadi flashcard interaktif siap pakai.
+      </p>
+      <div class="hero-cta">
+        <button class="btn-hero-primary" onclick="document.getElementById('input-section').scrollIntoView({behavior:'smooth'})">
+          <i class="fas fa-magic"></i> Mulai Generate Gratis
+        </button>
+        <button class="btn-hero-secondary" onclick="loadDemo()">
+          <i class="fas fa-play-circle"></i> Lihat Demo
+        </button>
+      </div>
+      <div class="hero-stats">
+        <div class="hero-stat">
+          <span class="stat-num" id="heroTotalCards">24</span>
+          <span class="stat-label">Flashcard Dibuat</span>
+        </div>
+        <div class="hero-divider"></div>
+        <div class="hero-stat">
+          <span class="stat-num">∞</span>
+          <span class="stat-label">Materi Didukung</span>
+        </div>
+        <div class="hero-divider"></div>
+        <div class="hero-stat">
+          <span class="stat-num">100%</span>
+          <span class="stat-label">Gratis & Offline</span>
+        </div>
+      </div>
+    </div>
+    <div class="hero-scroll">
+      <div class="scroll-indicator">
+        <i class="fas fa-chevron-down"></i>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== INPUT SECTION ===== -->
+  <section class="section" id="input-section">
+    <div class="container">
+      <div class="section-header">
+        <div class="section-badge"><i class="fas fa-edit"></i> Input Materi</div>
+        <h2 class="section-title">Masukkan Materi Kamu</h2>
+        <p class="section-subtitle">Paste teks langsung atau upload file PDF/TXT — FlashMind akan mengolahnya otomatis</p>
+      </div>
+
+      <div class="input-card glass-card">
+        <!-- Tab Input -->
+        <div class="input-tabs">
+          <button class="tab-btn active" data-tab="text">
+            <i class="fas fa-align-left"></i> Paste Teks
+          </button>
+          <button class="tab-btn" data-tab="file">
+            <i class="fas fa-file-upload"></i> Upload File
+          </button>
+        </div>
+
+        <!-- Text Tab -->
+        <div class="tab-content active" id="tab-text">
+          <div class="textarea-wrapper">
+            <textarea
+              id="materialInput"
+              class="material-textarea"
+              placeholder="Paste materi pelajaran kamu di sini...&#10;&#10;Contoh: Sistem tata surya terdiri dari Matahari dan delapan planet. Planet-planet tersebut adalah Merkurius, Venus, Bumi, Mars, Jupiter, Saturnus, Uranus, dan Neptunus. Gravitasi matahari menjaga planet-planet tetap berada di orbitnya..."
+              rows="12"
+            ></textarea>
+            <div class="textarea-footer">
+              <span class="char-count" id="charCount">0 karakter</span>
+              <button class="btn-text-sm" id="clearTextBtn"><i class="fas fa-times"></i> Clear</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- File Tab -->
+        <div class="tab-content" id="tab-file">
+          <div class="drop-zone" id="dropZone">
+            <div class="drop-zone-content">
+              <div class="drop-icon">
+                <i class="fas fa-cloud-upload-alt"></i>
+              </div>
+              <h3 class="drop-title">Drag & Drop File di Sini</h3>
+              <p class="drop-subtitle">Mendukung PDF dan TXT</p>
+              <button class="btn-outline" id="uploadBtn">
+                <i class="fas fa-folder-open"></i> Pilih File
+              </button>
+              <input type="file" id="fileInput" accept=".pdf,.txt" hidden />
+            </div>
+            <div class="file-preview" id="filePreview" style="display:none;">
+              <div class="file-info">
+                <div class="file-icon-wrap">
+                  <i class="fas fa-file-pdf file-icon" id="fileTypeIcon"></i>
+                </div>
+                <div class="file-details">
+                  <span class="file-name" id="fileName"></span>
+                  <span class="file-size" id="fileSize"></span>
+                </div>
+                <button class="btn-icon btn-remove" id="removeFileBtn">
+                  <i class="fas fa-times"></i>
+                </button>
+              </div>
+              <div class="pdf-progress" id="pdfProgress" style="display:none;">
+                <div class="pdf-progress-bar" id="pdfProgressBar"></div>
+                <span class="pdf-progress-text" id="pdfProgressText">Membaca PDF...</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Options -->
+        <div class="generate-options">
+          <div class="option-group">
+            <label class="option-label">Jumlah Flashcard</label>
+            <div class="option-row">
+              <button class="qty-btn" id="qtyMinus"><i class="fas fa-minus"></i></button>
+              <span class="qty-val" id="qtyValue">10</span>
+              <button class="qty-btn" id="qtyPlus"><i class="fas fa-plus"></i></button>
+            </div>
+          </div>
+          <div class="option-group">
+            <label class="option-label">Bahasa Output</label>
+            <select class="option-select" id="langSelect">
+              <option value="id">🇮🇩 Indonesia</option>
+              <option value="en">🇬🇧 English</option>
+            </select>
+          </div>
+          <div class="option-group">
+            <label class="option-label">Nama Deck</label>
+            <input type="text" class="option-input" id="deckNameInput" placeholder="Nama deck flashcard..." />
+          </div>
+        </div>
+
+        <button class="btn-generate" id="generateBtn">
+          <i class="fas fa-magic"></i>
+          <span id="generateBtnText">Generate Flashcards</span>
+          <div class="btn-glow"></div>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== LOADING OVERLAY ===== -->
+  <div class="loading-overlay" id="loadingOverlay">
+    <div class="loading-card glass-card">
+      <div class="loading-animation">
+        <div class="loading-ring"></div>
+        <div class="loading-ring ring-2"></div>
+        <div class="loading-ring ring-3"></div>
+        <div class="loading-icon"><i class="fas fa-brain"></i></div>
+      </div>
+      <div class="loading-steps">
+        <div class="loading-step active" id="step1">
+          <i class="fas fa-book-open"></i>
+          <span>Membaca materi...</span>
+        </div>
+        <div class="loading-step" id="step2">
+          <i class="fas fa-lightbulb"></i>
+          <span>Mengekstrak poin penting...</span>
+        </div>
+        <div class="loading-step" id="step3">
+          <i class="fas fa-layer-group"></i>
+          <span>Membuat flashcard...</span>
+        </div>
+        <div class="loading-step" id="step4">
+          <i class="fas fa-check-circle"></i>
+          <span>Selesai!</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== FLASHCARD SECTION ===== -->
+  <section class="section" id="flashcard-section" style="display:none;">
+    <div class="container">
+      <div class="section-header">
+        <div class="section-badge"><i class="fas fa-layer-group"></i> Flashcards</div>
+        <h2 class="section-title" id="flashcardDeckTitle">Flashcard Kamu</h2>
+        <p class="section-subtitle">Klik kartu untuk membalik dan melihat jawaban</p>
+      </div>
+
+      <!-- Toolbar -->
+      <div class="fc-toolbar">
+        <div class="fc-search-wrap">
+          <i class="fas fa-search"></i>
+          <input type="text" id="searchInput" class="fc-search" placeholder="Cari flashcard..." />
+        </div>
+        <div class="fc-toolbar-right">
+          <button class="btn-tool" id="shuffleBtn" title="Shuffle">
+            <i class="fas fa-random"></i> Shuffle
+          </button>
+          <button class="btn-tool" id="autoPlayBtn" title="Auto Play">
+            <i class="fas fa-play"></i> Auto
+          </button>
+          <div class="study-mode-wrap">
+            <select class="study-mode-select" id="studyMode">
+              <option value="easy">☀️ Easy</option>
+              <option value="medium" selected>⚡ Medium</option>
+              <option value="hard">🔥 Hard</option>
+            </select>
+          </div>
+          <button class="btn-tool btn-quiz" id="startQuizBtn">
+            <i class="fas fa-graduation-cap"></i> Quiz Mode
+          </button>
+        </div>
+      </div>
+
+      <!-- Card Viewer -->
+      <div class="card-viewer">
+        <button class="nav-arrow arrow-left" id="prevCard">
+          <i class="fas fa-chevron-left"></i>
+        </button>
+
+        <div class="card-stage">
+          <div class="flashcard" id="mainFlashcard">
+            <div class="card-inner" id="cardInner">
+              <div class="card-front" id="cardFront">
+                <div class="card-tag">Pertanyaan</div>
+                <div class="card-content" id="cardQuestion">Memuat...</div>
+                <div class="card-hint">
+                  <i class="fas fa-hand-pointer"></i> Klik untuk lihat jawaban
+                </div>
+              </div>
+              <div class="card-back" id="cardBack">
+                <div class="card-tag card-tag-answer">Jawaban</div>
+                <div class="card-content" id="cardAnswer">Memuat...</div>
+                <div class="card-hint">
+                  <i class="fas fa-arrow-left"></i> Klik untuk balik
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <button class="nav-arrow arrow-right" id="nextCard">
+          <i class="fas fa-chevron-right"></i>
+        </button>
+      </div>
+
+      <!-- Card Controls -->
+      <div class="card-controls">
+        <div class="card-counter" id="cardCounter">1 / 10</div>
+        <div class="card-actions">
+          <button class="card-action-btn btn-learned" id="markLearnedBtn">
+            <i class="fas fa-check"></i> Sudah Hafal
+          </button>
+          <button class="card-action-btn btn-flip" id="flipCardBtn">
+            <i class="fas fa-sync-alt"></i> Balik
+          </button>
+          <button class="card-action-btn btn-skip" id="markSkipBtn">
+            <i class="fas fa-forward"></i> Lewati
+          </button>
+        </div>
+      </div>
+
+      <!-- Card Dots Progress -->
+      <div class="card-dots" id="cardDots"></div>
+
+      <!-- Card Grid Preview -->
+      <div class="grid-header">
+        <h3 class="grid-title">Semua Flashcard</h3>
+        <div class="grid-header-right">
+          <button class="btn-sm btn-outline" id="exportTxtBtn"><i class="fas fa-file-alt"></i> TXT</button>
+          <button class="btn-sm btn-outline" id="exportJsonBtn"><i class="fas fa-code"></i> JSON</button>
+          <button class="btn-sm btn-outline" id="exportPdfBtn"><i class="fas fa-file-pdf"></i> PDF</button>
+          <button class="btn-sm btn-primary-sm" id="saveDeckBtn"><i class="fas fa-save"></i> Simpan</button>
+        </div>
+      </div>
+      <div class="card-grid" id="cardGrid"></div>
+    </div>
+  </section>
+
+  <!-- ===== QUIZ SECTION ===== -->
+  <section class="section" id="quiz-section" style="display:none;">
+    <div class="container">
+      <div class="section-header">
+        <div class="section-badge"><i class="fas fa-graduation-cap"></i> Quiz Mode</div>
+        <h2 class="section-title">Uji Pemahamanmu</h2>
+        <p class="section-subtitle">Jawab pertanyaan berikut untuk menguji hafalan kamu</p>
+      </div>
+
+      <div class="quiz-card glass-card" id="quizCard">
+        <!-- Quiz Header -->
+        <div class="quiz-header">
+          <div class="quiz-progress-info">
+            <span id="quizCounter">Soal 1 / 10</span>
+            <div class="quiz-score-badge">
+              <i class="fas fa-star"></i>
+              <span id="quizScore">0</span>
+            </div>
+          </div>
+          <div class="quiz-timer-wrap">
+            <i class="fas fa-clock"></i>
+            <span id="quizTimer">00:30</span>
+          </div>
+        </div>
+
+        <div class="quiz-progress-bar">
+          <div class="quiz-progress-fill" id="quizProgressFill"></div>
+        </div>
+
+        <!-- Question -->
+        <div class="quiz-question-wrap">
+          <p class="quiz-label">Pertanyaan:</p>
+          <h3 class="quiz-question" id="quizQuestion">Memuat pertanyaan...</h3>
+        </div>
+
+        <!-- Answer Input -->
+        <div class="quiz-answer-wrap" id="quizAnswerWrap">
+          <textarea
+            id="quizAnswerInput"
+            class="quiz-answer-input"
+            placeholder="Ketik jawabanmu di sini..."
+            rows="3"
+          ></textarea>
+          <button class="btn-check" id="checkAnswerBtn">
+            <i class="fas fa-check-circle"></i> Cek Jawaban
+          </button>
+        </div>
+
+        <!-- Answer Feedback -->
+        <div class="quiz-feedback" id="quizFeedback" style="display:none;">
+          <div class="feedback-result" id="feedbackResult"></div>
+          <div class="correct-answer-wrap">
+            <p class="correct-label">Jawaban Benar:</p>
+            <p class="correct-answer" id="correctAnswer"></p>
+          </div>
+          <button class="btn-next-quiz" id="nextQuizBtn">
+            Soal Berikutnya <i class="fas fa-arrow-right"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Quiz Result -->
+      <div class="quiz-result glass-card" id="quizResult" style="display:none;">
+        <div class="result-icon">
+          <i class="fas fa-trophy" id="resultIcon"></i>
+        </div>
+        <h2 class="result-title" id="resultTitle">Quiz Selesai!</h2>
+        <p class="result-subtitle" id="resultSubtitle">Hasil kamu:</p>
+        <div class="result-stats">
+          <div class="result-stat">
+            <span class="result-stat-num" id="resultScore">0</span>
+            <span class="result-stat-label">Benar</span>
+          </div>
+          <div class="result-stat">
+            <span class="result-stat-num" id="resultWrong">0</span>
+            <span class="result-stat-label">Salah</span>
+          </div>
+          <div class="result-stat">
+            <span class="result-stat-num" id="resultAccuracy">0%</span>
+            <span class="result-stat-label">Akurasi</span>
+          </div>
+        </div>
+        <div class="result-progress-wrap">
+          <div class="result-progress-bar">
+            <div class="result-progress-fill" id="resultProgressFill"></div>
+          </div>
+        </div>
+        <div class="result-actions">
+          <button class="btn-primary" id="retryQuizBtn">
+            <i class="fas fa-redo"></i> Coba Lagi
+          </button>
+          <button class="btn-outline" id="backToCardsBtn">
+            <i class="fas fa-layer-group"></i> Kembali ke Flashcard
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== SAVED SECTION ===== -->
+  <section class="section" id="saved-section">
+    <div class="container">
+      <div class="section-header">
+        <div class="section-badge"><i class="fas fa-bookmark"></i> Saved Decks</div>
+        <h2 class="section-title">Deck Tersimpan</h2>
+        <p class="section-subtitle">Koleksi flashcard yang sudah kamu buat</p>
+      </div>
+      <div class="saved-grid" id="savedGrid">
+        <div class="saved-empty" id="savedEmpty">
+          <div class="empty-icon"><i class="fas fa-folder-open"></i></div>
+          <p>Belum ada deck tersimpan.<br />Generate flashcard dan simpan deck kamu!</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== STATS SECTION ===== -->
+  <section class="section" id="stats-section">
+    <div class="container">
+      <div class="section-header">
+        <div class="section-badge"><i class="fas fa-chart-bar"></i> Statistik</div>
+        <h2 class="section-title">Progres Belajarmu</h2>
+        <p class="section-subtitle">Pantau perkembangan belajar kamu secara real-time</p>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-card glass-card">
+          <div class="stat-card-icon icon-blue">
+            <i class="fas fa-layer-group"></i>
+          </div>
+          <div class="stat-card-info">
+            <span class="stat-card-num" id="statTotal">0</span>
+            <span class="stat-card-label">Total Flashcard</span>
+          </div>
+        </div>
+        <div class="stat-card glass-card">
+          <div class="stat-card-icon icon-green">
+            <i class="fas fa-check-circle"></i>
+          </div>
+          <div class="stat-card-info">
+            <span class="stat-card-num" id="statLearned">0</span>
+            <span class="stat-card-label">Sudah Dipelajari</span>
+          </div>
+        </div>
+        <div class="stat-card glass-card">
+          <div class="stat-card-icon icon-orange">
+            <i class="fas fa-clock"></i>
+          </div>
+          <div class="stat-card-info">
+            <span class="stat-card-num" id="statPending">0</span>
+            <span class="stat-card-label">Belum Dipelajari</span>
+          </div>
+        </div>
+        <div class="stat-card glass-card">
+          <div class="stat-card-icon icon-purple">
+            <i class="fas fa-bullseye"></i>
+          </div>
+          <div class="stat-card-info">
+            <span class="stat-card-num" id="statAccuracy">0%</span>
+            <span class="stat-card-label">Akurasi Quiz</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="progress-section glass-card">
+        <h3 class="progress-title">Progress Belajar</h3>
+        <div class="progress-wrap">
+          <div class="progress-label-row">
+            <span>Flashcard Dipelajari</span>
+            <span id="progressPercent">0%</span>
+          </div>
+          <div class="progress-bar-outer">
+            <div class="progress-bar-inner" id="progressBar"></div>
+          </div>
+        </div>
+        <div class="progress-wrap">
+          <div class="progress-label-row">
+            <span>Akurasi Quiz</span>
+            <span id="quizAccuracyPercent">0%</span>
+          </div>
+          <div class="progress-bar-outer">
+            <div class="progress-bar-inner bar-purple" id="quizAccuracyBar"></div>
+          </div>
+        </div>
+        <div class="progress-wrap">
+          <div class="progress-label-row">
+            <span>Total Deck Tersimpan</span>
+            <span id="savedDecksCount">0 deck</span>
+          </div>
+          <div class="progress-bar-outer">
+            <div class="progress-bar-inner bar-orange" id="savedDecksBar"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== FOOTER ===== -->
+  <footer class="footer">
+    <div class="footer-container">
+      <div class="footer-brand">
+        <div class="nav-logo">
+          <i class="fas fa-bolt"></i>
+        </div>
+        <span class="brand-name">Flash<span class="brand-accent">Mind</span></span>
+      </div>
+      <p class="footer-tagline">Belajar lebih cepat dengan flashcard cerdas ⚡</p>
+      <p class="footer-copy">© 2024 FlashMind. Dibuat dengan ❤️ untuk para pelajar.</p>
+    </div>
+  </footer>
+
+  <!-- ===== TOAST NOTIFICATION ===== -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- ===== EDIT MODAL ===== -->
+  <div class="modal-overlay" id="editModal" style="display:none;">
+    <div class="modal glass-card">
+      <div class="modal-header">
+        <h3 class="modal-title"><i class="fas fa-edit"></i> Edit Flashcard</h3>
+        <button class="btn-icon" id="closeEditModal"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="modal-body">
+        <label class="modal-label">Pertanyaan (Depan)</label>
+        <textarea id="editQuestion" class="modal-textarea" rows="3"></textarea>
+        <label class="modal-label">Jawaban (Belakang)</label>
+        <textarea id="editAnswer" class="modal-textarea" rows="3"></textarea>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-outline" id="cancelEditBtn">Batal</button>
+        <button class="btn-primary" id="saveEditBtn">
+          <i class="fas fa-save"></i> Simpan
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
